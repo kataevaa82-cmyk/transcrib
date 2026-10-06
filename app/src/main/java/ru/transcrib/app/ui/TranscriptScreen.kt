@@ -340,13 +340,12 @@ fun TranscriptScreen(app: TranscribApp, id: String, openExport: Boolean = false,
 
     if (rerunDialog) {
         RerunDialog(
-            initialSpeakers = if (t.numSpeakers > 1) t.numSpeakers else app.settings.speakers,
             onDismiss = { rerunDialog = false },
-            onConfirm = { n ->
+            onConfirm = {
                 rerunDialog = false
                 player?.pause()
                 playing = false
-                app.jobs.rerun(t.id, t.title, t.createdAt, app.repository.audioFile(t.id), n)
+                app.jobs.rerun(t.id, t.title, t.createdAt, app.repository.audioFile(t.id))
                 Toast.makeText(context, "Распознаём заново — ход виден на главном экране", Toast.LENGTH_LONG).show()
                 onBack()
             },
@@ -1166,7 +1165,7 @@ private fun FileSheet(
             )
             Text(
                 if (action == FileAction.SHARE) {
-                    "Выберите формат — откроется список приложений: Telegram, WhatsApp, почта, облако."
+                    "Выберите формат — откроется список приложений: MAX, VK, Telegram, почта, облако."
                 } else {
                     "Файл сохранится на телефон в папку «Загрузки/${Exporter.DOWNLOAD_FOLDER}»."
                 },
@@ -1391,7 +1390,7 @@ private fun ShareSheet(
             }
             if (targets.isEmpty()) {
                 Text(
-                    "MAX, VK, Telegram и WhatsApp не найдены — нажмите «Ещё…», чтобы выбрать приложение.",
+                    "MAX, VK и Telegram не найдены — нажмите «Ещё…», чтобы выбрать приложение.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp),
@@ -1505,23 +1504,18 @@ private fun FindBar(
 }
 
 @Composable
-private fun RerunDialog(initialSpeakers: Int, onDismiss: () -> Unit, onConfirm: (Int) -> Unit) {
-    var speakers by remember { mutableIntStateOf(initialSpeakers) }
+private fun RerunDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Распознать заново") },
         text = {
-            Column {
-                Text(
-                    "Расшифровка будет пересчитана из сохранённой записи. Полезно, если спикеры определились " +
-                        "неверно — укажите их точное число. Ручные правки текста и имена спикеров сбросятся.",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Spacer(Modifier.height(14.dp))
-                SpeakerSelector(speakers, { speakers = it })
-            }
+            Text(
+                "Расшифровка будет пересчитана из сохранённой записи. " +
+                    "Ручные правки текста и имена спикеров сбросятся.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
         },
-        confirmButton = { TextButton(onClick = { onConfirm(speakers) }) { Text("Распознать") } },
+        confirmButton = { TextButton(onClick = onConfirm) { Text("Распознать") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Отмена") } },
     )
 }

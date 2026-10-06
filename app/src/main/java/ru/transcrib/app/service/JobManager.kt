@@ -21,7 +21,6 @@ data class ActiveJob(
     val title: String,
     val stage: Stage,
     val progress: Float,
-    val diarize: Boolean,
     /** Estimated seconds left, once there is enough progress to judge. */
     val etaSec: Long? = null,
     val cancelling: Boolean = false,
@@ -60,26 +59,24 @@ class JobManager(private val context: Context) {
         prefs.edit().remove(KEY_QUEUE).apply()
     }
 
-    fun enqueue(uri: Uri, numSpeakers: Int, ownRecording: File? = null, title: String? = null) {
+    fun enqueue(uri: Uri, ownRecording: File? = null, title: String? = null) {
         add(
             JobRequest(
                 id = UUID.randomUUID().toString(),
                 uri = uri,
                 title = title ?: displayName(uri),
-                numSpeakers = numSpeakers,
                 ownRecording = ownRecording,
             ),
         )
     }
 
-    /** Recognizes an existing transcript again from its saved audio, e.g. with another speaker count. */
-    fun rerun(id: String, title: String, createdAt: Long, audio: File, numSpeakers: Int) {
+    /** Recognizes an existing transcript again from its saved audio. */
+    fun rerun(id: String, title: String, createdAt: Long, audio: File) {
         add(
             JobRequest(
                 id = id,
                 uri = Uri.fromFile(audio),
                 title = title,
-                numSpeakers = numSpeakers,
                 rerun = true,
                 createdAt = createdAt,
             ),
@@ -142,7 +139,7 @@ class JobManager(private val context: Context) {
         _state.update {
             it.copy(
                 queued = pending.toList(),
-                active = job?.let { j -> ActiveJob(j.id, j.title, Stage.DECODING, 0f, j.numSpeakers != 1) },
+                active = job?.let { j -> ActiveJob(j.id, j.title, Stage.DECODING, 0f) },
             )
         }
         persist()
@@ -188,7 +185,6 @@ class JobManager(private val context: Context) {
                 put("id", j.id)
                 put("uri", j.uri.toString())
                 put("title", j.title)
-                put("speakers", j.numSpeakers)
                 j.ownRecording?.let { put("recording", it.absolutePath) }
                 put("rerun", j.rerun)
                 j.createdAt?.let { put("createdAt", it) }
@@ -205,7 +201,6 @@ class JobManager(private val context: Context) {
                 id = o.getString("id"),
                 uri = Uri.parse(o.getString("uri")),
                 title = o.getString("title"),
-                numSpeakers = o.getInt("speakers"),
                 ownRecording = o.optString("recording").takeIf { it.isNotEmpty() }?.let(::File),
                 rerun = o.optBoolean("rerun"),
                 createdAt = if (o.has("createdAt")) o.getLong("createdAt") else null,

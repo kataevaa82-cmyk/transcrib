@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
             else -> emptyList()
         }
         if (uris.isEmpty()) return
-        uris.forEach { app.jobs.enqueue(it, app.settings.speakers) }
+        uris.forEach { app.jobs.enqueue(it) }
         Toast.makeText(
             this,
             if (uris.size == 1) "Файл добавлен в очередь расшифровки" else "Файлов в очереди: ${uris.size}",

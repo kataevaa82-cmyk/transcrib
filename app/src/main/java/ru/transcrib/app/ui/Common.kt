@@ -1,7 +1,6 @@
 package ru.transcrib.app.ui
 
 import android.app.Activity
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -11,13 +10,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -160,57 +154,6 @@ fun ProgressRing(progress: Float, modifier: Modifier, stroke: Dp = 6.dp, track: 
         drawArc(
             Brand.coralGradient, -90f, 360f * progress.coerceIn(0f, 1f), false,
             Offset(inset, inset), arcSize, style = Stroke(s, cap = StrokeCap.Round),
-        )
-    }
-}
-
-private val speakerOptions = listOf(0 to "Авто", 1 to "1", 2 to "2", 3 to "3", 4 to "4", 5 to "5", 6 to "6")
-
-/** Segmented control for the expected number of speakers. */
-@Composable
-fun SpeakerSelector(value: Int, onChange: (Int) -> Unit, modifier: Modifier = Modifier, onDark: Boolean = false) {
-    val track = if (onDark) Color.White.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surfaceContainer
-    val idleText = if (onDark) Color.White.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
-    val hintColor = if (onDark) Color.White.copy(alpha = 0.55f) else MaterialTheme.colorScheme.onSurfaceVariant
-    Column(modifier) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(track)
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            speakerOptions.forEach { (v, label) ->
-                val selected = value == v
-                val bg by animateColorAsState(
-                    if (selected) MaterialTheme.colorScheme.primary else Color.Transparent, label = "seg",
-                )
-                val fg by animateColorAsState(
-                    if (selected) MaterialTheme.colorScheme.onPrimary else idleText, label = "segText",
-                )
-                Box(
-                    Modifier
-                        .weight(if (v == 0) 1.6f else 1f)
-                        .height(38.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(bg)
-                        .clickable { onChange(v) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(label, style = MaterialTheme.typography.labelLarge, color = fg, maxLines = 1)
-                }
-            }
-        }
-        Text(
-            when (value) {
-                0 -> "Число голосов определится само. Знаете точно — укажите, так надёжнее."
-                1 -> "Один голос: только текст по предложениям, без разметки спикеров."
-                else -> "В записи ${speakersLabel(value)} — каждая реплика будет подписана."
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = hintColor,
-            modifier = Modifier.padding(top = 8.dp, start = 4.dp),
         )
     }
 }

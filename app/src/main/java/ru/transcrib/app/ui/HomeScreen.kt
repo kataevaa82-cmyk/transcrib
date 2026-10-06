@@ -112,7 +112,6 @@ fun HomeScreen(
     var headerHeight by remember { mutableIntStateOf(0) }
     val items by app.repository.items.collectAsStateWithLifecycle()
     val jobs by app.jobs.state.collectAsStateWithLifecycle()
-    val speakers by app.settings.speakersFlow.collectAsStateWithLifecycle()
     val recorder by RecorderService.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var toDelete by remember { mutableStateOf<TranscriptMeta?>(null) }
@@ -150,7 +149,7 @@ fun HomeScreen(
             runCatching {
                 context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            app.jobs.enqueue(uri, app.settings.speakers)
+            app.jobs.enqueue(uri)
         }
     }
 
@@ -181,19 +180,6 @@ fun HomeScreen(
                     onRecord = onRecord,
                     modifier = Modifier.offset(y = (-56).dp).padding(horizontal = 16.dp),
                 )
-            }
-            item {
-                AppCard(Modifier.offset(y = (-40).dp).padding(horizontal = 16.dp).fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(AppIcons.Group, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Сколько человек говорит", style = MaterialTheme.typography.titleSmall)
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        SpeakerSelector(speakers, { app.settings.speakers = it })
-                    }
-                }
             }
 
             if (!notificationsOk) {
@@ -497,7 +483,7 @@ private fun JobCard(job: ActiveJob, queued: List<String>, onCancel: () -> Unit, 
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(8.dp))
-                    StageSteps(job.stage, job.diarize)
+                    StageSteps(job.stage)
                 }
                 IconButton(onClick = onCancel, enabled = !job.cancelling) {
                     Icon(Icons.Filled.Close, "Отменить", tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -517,8 +503,8 @@ private fun JobCard(job: ActiveJob, queued: List<String>, onCancel: () -> Unit, 
 }
 
 @Composable
-private fun StageSteps(stage: Stage, diarize: Boolean) {
-    val steps = if (diarize) listOf("Звук", "Текст", "Спикеры") else listOf("Звук", "Текст")
+private fun StageSteps(stage: Stage) {
+    val steps = listOf("Звук", "Текст", "Спикеры")
     val current = when (stage) {
         Stage.DECODING -> 0
         Stage.LOADING, Stage.RECOGNIZING -> 1

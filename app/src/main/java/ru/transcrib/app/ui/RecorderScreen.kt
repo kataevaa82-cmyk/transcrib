@@ -75,7 +75,6 @@ fun RecorderScreen(app: TranscribApp, onBack: () -> Unit) {
     SystemBarsIcons(lightIcons = true)
     val context = LocalContext.current
     val state by RecorderService.state.collectAsStateWithLifecycle()
-    val speakers by app.settings.speakersFlow.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val levels = remember { mutableStateListOf<Float>() }
 
@@ -186,17 +185,7 @@ fun RecorderScreen(app: TranscribApp, onBack: () -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 16.dp),
             )
-            Spacer(Modifier.height(28.dp))
-            Box(
-                Modifier
-                    .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(Color.White.copy(alpha = 0.06f))
-                    .padding(14.dp),
-            ) {
-                SpeakerSelector(speakers, { app.settings.speakers = it }, onDark = true)
-            }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.weight(0.5f))
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing))
     }

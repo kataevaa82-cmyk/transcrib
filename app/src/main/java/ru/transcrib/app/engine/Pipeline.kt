@@ -25,8 +25,6 @@ class JobRequest(
     val id: String,
     val uri: Uri,
     val title: String,
-    /** 0 = auto, 1 = diarization off, N = exactly N speakers. */
-    val numSpeakers: Int,
     /** A recording made by the app itself; deleted after a successful transcription. */
     val ownRecording: File? = null,
     /**
@@ -61,8 +59,7 @@ class Pipeline(
         outDir.mkdirs()
         val pcmFile = File(context.cacheDir, "job_${job.id}.pcm")
         val audioFile = File(outDir, "audio.m4a")
-        val diarize = job.numSpeakers != 1
-        val w = weights(diarize)
+        val w = Weights(0.05f, 0.62f, 0.33f)
 
         try {
             // 1. Decode to 16 kHz mono PCM.
@@ -125,12 +122,12 @@ class Pipeline(
                 // 4. Speaker diarization.
                 var turns: List<SpeakerTurn>? = null
                 var numSpeakers = -1
-                if (diarize && words.isNotEmpty()) {
+                if (words.isNotEmpty()) {
                     if (!job.rerun) runCatching { checkpoint(transcript(TextAssembler.assemble(words, null), -1)) }
                         .onFailure { Log.w(TAG, "Checkpoint failed", it) }
                     progress.update(Stage.DIARIZING, w.decode + w.asr)
                     turns = try {
-                        Diarizer(models).run(pcm, job.numSpeakers, speech, { f ->
+                        Diarizer(models).run(pcm, 0, speech, { f ->
                             progress.update(Stage.DIARIZING, w.decode + w.asr + f * w.diar)
                         }, isCancelled)
                     } catch (e: CancellationException) {
@@ -239,9 +236,6 @@ class Pipeline(
     }
 
     private class Weights(val decode: Float, val asr: Float, val diar: Float)
-
-    private fun weights(diarize: Boolean) =
-        if (diarize) Weights(0.05f, 0.62f, 0.33f) else Weights(0.06f, 0.94f, 0f)
 
     companion object {
         private const val TAG = "Pipeline"

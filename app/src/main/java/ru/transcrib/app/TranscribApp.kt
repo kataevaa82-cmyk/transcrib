@@ -4,24 +4,12 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import ru.transcrib.app.data.TranscriptRepository
 import ru.transcrib.app.engine.Models
 import ru.transcrib.app.service.JobManager
 
 class Settings(context: Context) {
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    private val _speakers = MutableStateFlow(prefs.getInt(KEY_SPEAKERS, 0))
-
-    /** 0 = auto, 1 = one speaker (no diarization), N = exactly N speakers. */
-    val speakersFlow: StateFlow<Int> = _speakers
-    var speakers: Int
-        get() = _speakers.value
-        set(v) {
-            _speakers.value = v
-            prefs.edit().putInt(KEY_SPEAKERS, v).apply()
-        }
 
     var showTimestamps: Boolean
         get() = prefs.getBoolean(KEY_TIMESTAMPS, true)
@@ -51,7 +39,6 @@ class Settings(context: Context) {
         set(v) = prefs.edit().putFloat(KEY_SPEED, v).apply()
 
     private companion object {
-        const val KEY_SPEAKERS = "speakers"
         const val KEY_TIMESTAMPS = "timestamps"
         const val KEY_CHAT = "chat_view"
         const val KEY_SPEED = "speed"

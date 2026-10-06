@@ -155,7 +155,7 @@ class RecorderService : Service() {
             if (transcribe && ok && duration >= 1000) {
                 val app = application as TranscribApp
                 val title = "Запись " + SimpleDateFormat("d MMM yyyy, HH:mm", Locale("ru")).format(Date())
-                app.jobs.enqueue(Uri.fromFile(f), app.settings.speakers, ownRecording = f, title = title)
+                app.jobs.enqueue(Uri.fromFile(f), ownRecording = f, title = title)
             } else {
                 f.delete()
                 if (transcribe) _state.value = RecorderState(error = "Запись слишком короткая")

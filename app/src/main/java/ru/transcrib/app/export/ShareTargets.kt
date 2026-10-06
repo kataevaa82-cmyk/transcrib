@@ -25,7 +25,6 @@ object ShareTargets {
         "MAX" to listOf("ru.oneme.app"),
         "VK" to listOf("com.vkontakte.android", "com.vk.im"),
         "Telegram" to listOf("org.telegram.messenger", "org.telegram.messenger.web", "org.thunderdog.challegram"),
-        "WhatsApp" to listOf("com.whatsapp", "com.whatsapp.w4b"),
     )
 
     /** Messengers installed on the phone that accept this kind of content. */
