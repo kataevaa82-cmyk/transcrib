@@ -1,0 +1,4 @@
+# file | crop_top | crop_bottom | caption   (rows cut off the status bar and navigation bar)
+home.jpg | 60 | 1204 | Расшифровка аудио и видео без интернета
+transcript.jpg | 60 | 1216 | Текст с пунктуацией: слушайте фразы и правьте
+history.jpg | 72 | 1216 | Все расшифровки под рукой: поиск и отправка
